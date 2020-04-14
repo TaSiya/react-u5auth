@@ -40,13 +40,7 @@ export default ({
 
   const useToken =   () => {
     const { token } = useContext(context)
-    if (token) {
-      if(token.expires_in == 3600){ 
-        exhancgeRefreshTokenForAccessToken({clientId, clientSecret, tokenEndpoint, fetch , token })
-        .then(response => response)
-      }
-      return token
-    } else {
+    if (!token) {
       console.warn(`Trying to useToken() while not being authenticated.\nMake sure to useToken() only inside of an <Authenticated /> component.`)
     }
     return token
@@ -76,8 +70,14 @@ export default ({
               alert(`Error fetching auth token: ${e.message}`)
             })
           }
-        } {
-          
+        } else {
+          const now = new Date
+          const elapsed = now.getTime() - new Date(token.expires_in).getTime()
+          if(elapsed > 100000){ 
+            console.log('old token',token)
+            exhancgeRefreshTokenForAccessToken({clientId, clientSecret, tokenEndpoint, fetch , token })
+            .then(setToken)
+          }
         }
       }, [token])
 

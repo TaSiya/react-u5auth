@@ -25,7 +25,7 @@ export const exhancgeRefreshTokenForAccessToken = ({ clientId, clientSecret, tok
       if (expires_in && Number.isFinite(expires_in)) {
         const slackSeconds = 10;
         // add 'expires_at', with the given slack
-        token.expires_at = 10000;
+        token.expires_at = new Date(new Date().getTime() + expires_in * 1000 - (slackSeconds * 1000));
       }
       return token;
     })
