@@ -5,6 +5,7 @@ import { fetchToken } from './helpers/fetchToken'
 import { removeCodeFromLocation } from './helpers/removeCodeFromLocation'
 import { getVerifierFromStorage } from './helpers/getVerifierFromStorage'
 import { removeVerifierFromStorage } from './helpers/removeVerifierFromStorage'
+import {exhancgeRefreshTokenForAccessToken} from './helpers/exchangeRefreshForAccessToken'
 
 export default ({
   clientId,
@@ -37,9 +38,15 @@ export default ({
     }
   }
 
-  const useToken = () => {
+  const useToken =   () => {
     const { token } = useContext(context)
-    if (!token) {
+    if (token) {
+      if(token.expires_in == 3600){ 
+        exhancgeRefreshTokenForAccessToken({clientId, clientSecret, tokenEndpoint, fetch , token })
+        .then(response => response)
+      }
+      return token
+    } else {
       console.warn(`Trying to useToken() while not being authenticated.\nMake sure to useToken() only inside of an <Authenticated /> component.`)
     }
     return token
@@ -69,6 +76,8 @@ export default ({
               alert(`Error fetching auth token: ${e.message}`)
             })
           }
+        } {
+          
         }
       }, [token])
 
