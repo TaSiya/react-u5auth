@@ -39,8 +39,22 @@ export default ({
   }
 
   const useToken =   () => {
-    const { token } = useContext(context)
-    if (!token) {
+    const { token, setAccessToke } = useContext(context)
+    if (token) {
+      const now = new Date()
+      const elapsed = now.getTime() - new Date(token.expires_at).getTime()
+      const slack = 10
+      console.log('now.getTime()',now.getTime())
+      console.log('elapsed', elapsed)
+      if(elapsed > slack){ 
+        console.log('token is old ',token)
+        return exhancgeRefreshTokenForAccessToken({clientId, clientSecret, tokenEndpoint, fetch , token })
+        .then(response => {
+          setAccessToke(response)
+        })
+      }
+      return token
+    } else {
       console.warn(`Trying to useToken() while not being authenticated.\nMake sure to useToken() only inside of an <Authenticated /> component.`)
     }
     return token
@@ -49,7 +63,9 @@ export default ({
   return {
     AuthContext: ({children}) => {
       const [token, setToken] = useState(null)
-
+      const setAccessToke = value => {
+        setToken(value)
+      }
       // if we have no token, but code and verifier are present,
       // then we try to swap code for token
       useEffect(() => {
@@ -70,15 +86,7 @@ export default ({
               alert(`Error fetching auth token: ${e.message}`)
             })
           }
-        } else {
-          const now = new Date
-          const elapsed = now.getTime() - new Date(token.expires_in).getTime()
-          if(elapsed > 100000){ 
-            console.log('old token',token)
-            exhancgeRefreshTokenForAccessToken({clientId, clientSecret, tokenEndpoint, fetch , token })
-            .then(setToken)
-          }
-        }
+        } 
       }, [token])
 
       const ensureAuthenticated = () => {
@@ -89,7 +97,7 @@ export default ({
       }
 
       return (
-        <Provider value={{token, ensureAuthenticated}}>
+        <Provider value={{token, ensureAuthenticated, setAccessToke}}>
           {children}
         </Provider>
       )
