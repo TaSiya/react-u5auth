@@ -44,10 +44,7 @@ export default ({
       const now = new Date()
       const elapsed = now.getTime() - new Date(token.expires_at).getTime()
       const slack = 10
-      console.log('now.getTime()',now.getTime())
-      console.log('elapsed', elapsed)
       if(elapsed > slack){ 
-        console.log('token is old ',token)
         return exhancgeRefreshTokenForAccessToken({clientId, clientSecret, tokenEndpoint, fetch , token })
         .then(response => {
           setAccessToke(response)
