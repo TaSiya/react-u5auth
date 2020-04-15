@@ -20,7 +20,6 @@ export const exhancgeRefreshTokenForAccessToken = ({ clientId, clientSecret, tok
       return r.json();
     })
     .then(token => {
-      console.log('tokkken',token)
       const { expires_in } = token;
       if (expires_in && Number.isFinite(expires_in)) {
         const slackSeconds = 10;
